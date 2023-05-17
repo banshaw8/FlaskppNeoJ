@@ -1,0 +1,4 @@
+Flask==2.3.2
+Flask-DataTables==0.6.17
+sqlalchemy==2.0.13
+neo4j==4.3.6

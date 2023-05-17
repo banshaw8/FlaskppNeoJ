@@ -1,0 +1,36 @@
+th {
+    background-color: #f2f2f2;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+.base-margin-bottom {
+    margin-bottom: 40px;
+}
+
+.base-margin-top {
+    margin-top: 50px;
+}
+
+.link {
+    stroke: #999;
+    stroke-opacity: 0.6;
+}
+
+.arrowhead {
+    fill: #999;
+}
+
+.node title {
+    pointer-events: none;
+    font-size: 12px;
+}
+
+.node {
+    stroke: #fff;
+    stroke-width: 1.5px;
+}

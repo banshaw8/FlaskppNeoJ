@@ -1,0 +1,149 @@
+{% extends "bootstrap/base.html" %}
+
+{% block head %}
+{{ super() }}
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<style>
+    .link {
+        stroke: #999;
+        stroke-opacity: 0.6;
+    }
+
+    .arrowhead {
+        fill: #999;
+    }
+
+    .node title {
+        pointer-events: none;
+        font-size: 12px;
+    }
+
+    .node {
+        stroke: #fff;
+        stroke-width: 1.5px;
+    }
+
+    .relationship-label {
+        font-size: 12px;
+        fill: #000;
+        text-anchor: middle;
+        pointer-events: none;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+
+<h1>User Relationships</h1>
+
+<svg id="graph" width="800" height="600"></svg>
+
+<script>
+    var data = {{ data| safe }};
+
+    var svg = d3.select("#graph");
+
+    var simulation = d3.forceSimulation(data.nodes)
+        .force("link", d3.forceLink(data.links).id(function (d) { return d.id; }).distance(300))
+        .force("charge", d3.forceManyBody())
+        .force("center", d3.forceCenter(svg.node().getBoundingClientRect().width / 3, svg.node().getBoundingClientRect().height / 3));
+
+    var arrowhead = svg.append("defs").append("marker")
+        .attr("id", "arrowhead")
+        .attr("class", "arrowhead")
+        .attr("markerWidth", 10)
+        .attr("markerHeight", 10)
+        .attr("refX", 9)
+        .attr("refY", 3)
+        .attr("orient", "auto")
+        .attr("markerUnits", "userSpaceOnUse")
+        .append("path")
+        .attr("d", "M0,0L0,6L9,3Z");
+
+    var link = svg.selectAll(".line")
+        .data(data.links)
+        .enter().append("line")
+        .attr("class", "link")
+        .attr("x1", function (d) { return d.source.x; })
+        .attr("y1", function (d) { return d.source.y; })
+        .attr("x2", function (d) { return d.target.x; })
+        .attr("y2", function (d) { return d.target.y; })
+        .attr("marker-end", "url(#arrowhead)");
+
+    var node = svg.selectAll(".node")
+        .data(data.nodes)
+        .enter().append("circle")
+        .attr("class", "node")
+        .attr("r", 20)
+        .attr("fill", "steelblue")
+        .call(drag(simulation));
+
+    node.append("title")
+        .text(function (d) { return d.name; });
+
+    var relationshipLabel = svg.selectAll(".relationship-label")
+        .data(data.links)
+        .enter().append("text")
+        .attr("class", "relationship-label")
+        .attr("text-anchor", "middle")
+        .attr("alignment-baseline", "middle")
+        .text(function (d) { return d.relationship; });
+
+    simulation.on("tick", function () {
+        link
+            .attr("x1", function (d) { return d.source.x; })
+            .attr("y1", function (d) { return d.source.y; })
+            .attr("x2", function (d) { return d.target.x; })
+            .attr("y2", function (d) { return d.target.y; });
+
+        node
+            .attr("cx", function (d) { return d.x; })
+            .attr("cy", function (d) { return d.y; });
+
+        relationshipLabel
+            .attr("x", function (d) { return (d.source.x + d.target.x) / 2; })
+            .attr("y", function (d) { return (d.source.y + d.target.y) / 2; })
+            .attr("transform", function (d) {
+                var dx = d.target.x - d.source.x;
+                var dy = d.target.y - d.source.y;
+                var angle = Math.atan2(dy, dx) * 180 / Math.PI;
+
+                // Adjust the rotation angle for upside-down labels
+                if (angle > 90) {
+                    angle -= 180;
+                } else if (angle < -90) {
+                    angle += 180;
+                }
+
+                return "rotate(" + angle + " " + (d.source.x + d.target.x) / 2 + " " + (d.source.y + d.target.y) / 2 + ")";
+            });
+    });
+
+
+
+    function drag(simulation) {
+        function dragstarted(event, d) {
+            if (!event.active) simulation.alphaTarget(0.3).restart();
+            d.fx = d.x;
+            d.fy = d.y;
+        }
+
+        function dragged(event, d) {
+            d.fx = event.x;
+            d.fy = event.y;
+        }
+
+        function dragended(event, d) {
+            if (!event.active) simulation.alphaTarget(0);
+            d.fx = null;
+            d.fy = null;
+        }
+
+        return d3.drag()
+            .on("start", dragstarted)
+            .on("drag", dragged)
+            .on("end", dragended);
+    }
+</script>
+
+{% endblock %}
