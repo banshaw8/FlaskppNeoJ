@@ -16,6 +16,10 @@ tr:nth-child(even) {
     margin-top: 50px;
 }
 
+.base-margin-left {
+    margin-left: 20px;
+}
+
 .link {
     stroke: #999;
     stroke-opacity: 0.6;
@@ -33,4 +37,11 @@ tr:nth-child(even) {
 .node {
     stroke: #fff;
     stroke-width: 1.5px;
+}
+
+.relationship-label {
+    font-size: 12px;
+    fill: #000;
+    text-anchor: middle;
+    pointer-events: none;
 }

@@ -2,39 +2,14 @@
 
 {% block head %}
 {{ super() }}
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='table-style.css') }}">
 <script src="https://d3js.org/d3.v7.min.js"></script>
-<style>
-    .link {
-        stroke: #999;
-        stroke-opacity: 0.6;
-    }
-
-    .arrowhead {
-        fill: #999;
-    }
-
-    .node title {
-        pointer-events: none;
-        font-size: 12px;
-    }
-
-    .node {
-        stroke: #fff;
-        stroke-width: 1.5px;
-    }
-
-    .relationship-label {
-        font-size: 12px;
-        fill: #000;
-        text-anchor: middle;
-        pointer-events: none;
-    }
-</style>
 {% endblock %}
 
 {% block body %}
 
-<h1>User Relationships</h1>
+<h1 class="base-margin-left">User Relationships<button id="downloadButton"
+        class="btn btn-primary base-margin-left">Download CSV</button></h1>
 
 <svg id="graph" width="800" height="600"></svg>
 
@@ -108,7 +83,6 @@
                 var dy = d.target.y - d.source.y;
                 var angle = Math.atan2(dy, dx) * 180 / Math.PI;
 
-                // Adjust the rotation angle for upside-down labels
                 if (angle > 90) {
                     angle -= 180;
                 } else if (angle < -90) {
@@ -144,6 +118,36 @@
             .on("drag", dragged)
             .on("end", dragended);
     }
+
+    function convertToCSV(data) {
+        var csv = "source name, target name, relationship\n";
+        data.links.forEach(function (link) {
+            var sourceName = data.nodes.find(function (node) {
+                return node.id === link.source.id;
+            }).name;
+            var targetName = data.nodes.find(function (node) {
+                return node.id === link.target.id;
+            }).name;
+            csv += sourceName + "," + targetName + "," + link.relationship + "\n";
+        });
+        return csv;
+    }
+
+    function downloadCSV() {
+        var csvData = convertToCSV(data);
+        var blob = new Blob([csvData], { type: 'text/csv;charset=utf-8;' });
+        var link = document.createElement("a");
+        var url = URL.createObjectURL(blob);
+        link.setAttribute("href", url);
+        link.setAttribute("download", "user_relationships.csv");
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
+    var downloadButton = document.getElementById("downloadButton");
+    downloadButton.addEventListener("click", downloadCSV);
 </script>
 
 {% endblock %}

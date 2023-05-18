@@ -9,7 +9,6 @@ bootstrap = Bootstrap(app)
 driver = GraphDatabase.driver("bolt://3.86.162.148:7687", auth=("neo4j", "cannon-multiplication-meridian"))
 
 def hello():
-    # Define your data as a list of dictionaries
     data = [
         {'id': 112421, 'name': 'Alice', 'age': 25, 'location': 'California'},
         {'id': 234543, 'name': 'Bob', 'age': 30, 'location': 'Texas'},
@@ -23,11 +22,9 @@ def hello():
         SET user.name = row.name, user.age = row.age, user.location = row.location
     """
 
-    # Execute the Cypher query to store the data in Neo4j
     with driver.session() as session:
         session.run(cypher_query, data=data)
 
-    # Create relationships between nodes
     cypher_relationship_query = """
         MATCH (alice:User {name: 'Alice'}), (bob:User {name: 'Bob'}),
               (charlie:User {name: 'Charlie'}), (dave:User {name: 'Dave'})
@@ -52,10 +49,8 @@ def dashboard():
     with driver.session() as session:
         result = session.run(cypher_relationship_query)
 
-        # Convert the query result to a list of dictionaries
         relationships = [dict(record) for record in result]
 
-        # Prepare the data structure with required properties
         nodes = {}
         links = []
         for relationship in relationships:
@@ -81,11 +76,7 @@ def dashboard():
 
         data = {'nodes': list(nodes.values()), 'links': links}
 
-    # Pass the data to the template for rendering
     return render_template('hello.jinja', data=json.dumps(data))
-
-
-
 
 
 app.debug = True
